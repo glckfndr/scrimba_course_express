@@ -1,14 +1,13 @@
-import express from 'express'
-import { startups } from './data/data.js'
+import express from "express";
+import { startups } from "./data/data.js";
 
-const PORT = 8000
+const PORT = 8000;
 
-const app = express()
+const app = express();
 
-app.get('/api', (req, res) => {
-
-  let filteredData = startups
-/*
+app.get("/api", (req, res) => {
+  let filteredData = startups;
+  /*
 Challenge:
 1. When a user hits the /api endpoint with query params, filter the data so
 we only serve objects that meet their requirements.
@@ -27,11 +26,27 @@ Test Cases
 /api?continent=asia&is_seeking_funding=true&has_mvp=true
   should get for objects with IDs 3, 22, 26, 29
 */
-  console.log(req.query)
-  res.json(filteredData)
+  const { industry, country, continent, is_seeking_funding, has_mvp } =
+    req.query;
 
-})
+  res.json(
+    filteredData.filter(
+      (item) =>
+        (industry
+          ? item.industry.toLowerCase() === industry.toLowerCase()
+          : true) &&
+        (country
+          ? item.country.toLowerCase() === country.toLowerCase()
+          : true) &&
+        (continent
+          ? item.continent.toLowerCase() === continent.toLowerCase()
+          : true) &&
+        (is_seeking_funding
+          ? item.is_seeking_funding.toString() === is_seeking_funding
+          : true) &&
+        (has_mvp ? item.has_mvp.toString() === has_mvp : true)
+    )
+  );
+});
 
-app.listen(PORT, () => console.log(`server connected on port ${PORT}`))
-
-
+app.listen(PORT, () => console.log(`server connected on port ${PORT}`));
