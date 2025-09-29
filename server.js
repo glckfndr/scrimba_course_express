@@ -5,18 +5,86 @@ const PORT = 8000;
 
 const app = express();
 
+app.get("/api", (req, res) => {
+  let filteredData = startups;
+
+  const { industry, country, continent, is_seeking_funding, has_mvp } =
+    req.query;
+
+  if (industry) {
+    filteredData = filteredData.filter(
+      (startup) => startup.industry.toLowerCase() === industry.toLowerCase()
+    );
+  }
+
+  if (country) {
+    filteredData = filteredData.filter(
+      (startup) => startup.country.toLowerCase() === country.toLowerCase()
+    );
+  }
+
+  if (continent) {
+    filteredData = filteredData.filter(
+      (startup) => startup.continent.toLowerCase() === continent.toLowerCase()
+    );
+  }
+
+  if (is_seeking_funding) {
+    filteredData = filteredData.filter(
+      (startup) =>
+        startup.is_seeking_funding ===
+        JSON.parse(is_seeking_funding.toLowerCase())
+    );
+  }
+
+  if (has_mvp) {
+    filteredData = filteredData.filter(
+      (startup) => startup.has_mvp === JSON.parse(has_mvp.toLowerCase())
+    );
+  }
+
+  res.json(filteredData);
+});
+
+app.get("/api/:field/:term", (req, res) => {
+  let filteredData = startups;
+  const fields = ["country", "continent", "industry"];
+
+  function filterParams(field) {
+    if (req.params.field === field) {
+      filteredData = filteredData.filter(
+        (startup) =>
+          startup[field].toLowerCase() === req.params.term.toLowerCase()
+      );
+    }
+  }
+  fields.forEach((field) => filterParams(field));
+  res.json(filteredData);
+});
+
 /*
 Challenge:
-1. Update the code so a GET request to api/metals/gold
-    logs an object {category: ‘metals’, type: ‘gold’}
+1. Add a new route which accepts GET requests to /api/<field>/<term>.
+2. Filter the data based on the path params.
+3. Serve the filtered data.
 
-But a GET request to api/crypto/eth
-    logs an object {category: crypto-name, type: eth}
+For now, don’t worry that using some fields will trigger an error.
+
+** The functionality **
+Get all startups in a given country via api/country/<country name>
+Get all startups in a given continent via api/continent/<continent name>
+Get all startups in a given industry via api/industry/<industry name>
+
+**Test Cases**
+
+These should work:
+  api/country/india
+  api/continent/europe
+  api/industry/ai
+
+This will throw an error - but that's fine!
+	api/has_mvp/true
+
 */
-
-app.get("/api/:category/:type", (req, res) => {
-  console.log(req.params);
-  res.json();
-});
 
 app.listen(PORT, () => console.log(`server connected on port ${PORT}`));
